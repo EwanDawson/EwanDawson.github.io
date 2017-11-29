@@ -1,6 +1,8 @@
 #+TITLE: Dependency Tracking
 
-First, we define a directed graph of dependencies:
+* Dependency Graph
+
+  First, we define a directed graph of dependencies:
 
 #+NAME: Dependency Graph
 #+BEGIN_SRC dot :file dependency-graph.png
@@ -18,7 +20,9 @@ First, we define a directed graph of dependencies:
 #+RESULTS: Dependency Graph
 [[file:dependency-graph.png]]
 
-The dependency relationships can be captured in a table, enumerating the shortest path (distance ~d~) between any two nodes ~f~ and ~t~. A ~direct dependency~ is defined as one of distance ~d = 1~, while a ~transitive dependency~ is defined as one of distance ~d > 1~. Note that in general there may multiple paths from ~f~ to ~t~ resulting in a transitive dependency; we are only interested in capturing the one with the shortest distance. 
+* Dependency Table
+
+  The dependency relationships can be captured in a table, enumerating the shortest path (distance ~d~) between any two nodes ~f~ and ~t~. A ~direct dependency~ is defined as one of distance ~d = 1~, while a ~transitive dependency~ is defined as one of distance ~d > 1~. Note that in general there may multiple paths from ~f~ to ~t~ resulting in a transitive dependency; we are only interested in capturing the one with the shortest distance. 
 
 #+NAME: Dependency Table
 | f | t | d |
@@ -38,4 +42,19 @@ The dependency relationships can be captured in a table, enumerating the shortes
 | B | F | 3 |
 | A | F | 4 |
 
+** Adding a dependency
 
+   We only add direct dependencies to our table. But we need to take into account the case where a dependency already exists:
+
+ #+NAME: Add direct dependency
+ #+BEGIN_SRC groovy
+   // Adding the dependency from C to F
+   def existing = pm.query("SELECT UNIQUE FROM Dependency WHERE f = 'C' AND t = 'F'").execute()
+   if (!existing) {
+     pm.makePersistent(new Dependecy(f: 'C', t: 'F', d: 1)
+   else {
+     existing.d = 1
+     // TODO: for all nodes that depend on C, reduce their distance by the difference between the previous d(C,F) - 1 (e.g. if the previous distance was 3, reduce the distance of all dependencies on F that pass through C by 2.
+   }
+   // TODO: Update transitive dependencies
+ #+END_SRC

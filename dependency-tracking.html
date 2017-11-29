@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2017-11-29 Wed 08:28 -->
+<!-- 2017-11-29 Wed 09:45 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Dependency Tracking</title>
@@ -228,6 +228,23 @@ for the JavaScript code in this tag.
 <body>
 <div id="content">
 <h1 class="title">Dependency Tracking</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orge684fda">1. Dependency Graph</a></li>
+<li><a href="#org0510979">2. Dependency Table</a>
+<ul>
+<li><a href="#org1583307">2.1. Adding a dependency</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orge684fda" class="outline-2">
+<h2 id="orge684fda"><span class="section-number-2">1</span> Dependency Graph</h2>
+<div class="outline-text-2" id="text-1">
 <p>
 First, we define a directed graph of dependencies:
 </p>
@@ -237,12 +254,17 @@ First, we define a directed graph of dependencies:
 <p><img src="dependency-graph.png" alt="dependency-graph.png" />
 </p>
 </div>
+</div>
+</div>
 
+<div id="outline-container-org0510979" class="outline-2">
+<h2 id="org0510979"><span class="section-number-2">2</span> Dependency Table</h2>
+<div class="outline-text-2" id="text-2">
 <p>
 The dependency relationships can be captured in a table, enumerating the shortest path (distance <code>d</code>) between any two nodes <code>f</code> and <code>t</code>. A <code>direct dependency</code> is defined as one of distance <code>d = 1</code>, while a <code>transitive dependency</code> is defined as one of distance <code>d &gt; 1</code>. Note that in general there may multiple paths from <code>f</code> to <code>t</code> resulting in a transitive dependency; we are only interested in capturing the one with the shortest distance. 
 </p>
 
-<table id="org24a5aed" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="org42fbfe6" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -346,8 +368,32 @@ The dependency relationships can be captured in a table, enumerating the shortes
 </tbody>
 </table>
 </div>
+
+<div id="outline-container-org1583307" class="outline-3">
+<h3 id="org1583307"><span class="section-number-3">2.1</span> Adding a dependency</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+We only add direct dependencies to our table. But we need to take into account the case where a dependency already exists:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-groovy" id="orgbd486b7"><span style="color: #2aa1ae; background-color: #292e34;">// Adding the dependency from C to F</span>
+<span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #7590db;">existing</span> = pm.query<span style="color: #4f97d7;">(</span><span style="color: #2d9574;">"SELECT UNIQUE FROM Dependency WHERE f = 'C' AND t = 'F'"</span><span style="color: #4f97d7;">)</span>.execute<span style="color: #4f97d7;">()</span>
+<span style="color: #4f97d7; font-weight: bold;">if</span> <span style="color: #4f97d7;">(</span>!existing<span style="color: #4f97d7;">)</span> <span style="color: #4f97d7;">{</span>
+  pm.makePersistent<span style="color: #bc6ec5;">(</span><span style="color: #4f97d7; font-weight: bold;">new</span> <span style="color: #ce537a; font-weight: bold;">Dependecy</span><span style="color: #2d9574;">(</span>f: <span style="color: #2d9574;">'C'</span>, t: <span style="color: #2d9574;">'F'</span>, d: <span style="color: #a45bad;">1</span><span style="color: #2d9574;">)</span>
+<span style="color: #4f97d7; font-weight: bold;">else</span> <span style="color: #2d9574;">{</span>
+  existing.d = <span style="color: #a45bad;">1</span>
+  <span style="color: #2aa1ae; background-color: #292e34;">// </span><span style="color: #cc9393;">TODO</span><span style="color: #2aa1ae; background-color: #292e34;">: for all nodes that depend on C, reduce their distance by the difference between the previous d(C,F) - 1 (e.g. if the previous distance was 3, reduce the distance of all dependencies on F that pass through C by 2.</span>
+<span style="color: #2d9574;">}</span>
+<span style="color: #2aa1ae; background-color: #292e34;">// </span><span style="color: #cc9393;">TODO</span><span style="color: #2aa1ae; background-color: #292e34;">: Update transitive dependencies</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
 <div id="postamble" class="status">
-<p class="date">Created: 2017-11-29 Wed 08:28</p>
+<p class="date">Created: 2017-11-29 Wed 09:45</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
